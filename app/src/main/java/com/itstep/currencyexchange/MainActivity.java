@@ -7,6 +7,9 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -44,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText editTextSum;
 
     private Button convertButton;
-    private Button logOutButton;
     private Button currencyInfoButton;
     private RadioButton radioBuy, radioSell, radioCross;
     private Spinner spinnerCurrencyFrom, spinnerCurrencyTo;
@@ -55,13 +57,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     DecimalFormat df = new DecimalFormat("#,###.##");
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    private void singOut() {
+        FirebaseAuth.getInstance().signOut();
+        Intent loginIntend = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivityForResult(loginIntend, 0);
+    }
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.appbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId()==R.id.logOut) {
+                    singOut();
+                    return true;
+                }
+                return false;
+
+            }
+        });
         setSupportActionBar(toolbar);
+
         Intent intent = getIntent();
         String userName = intent.getStringExtra("user_name");
         String photoURL = intent.getStringExtra("url_img");
@@ -73,10 +100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         greetingText = findViewById(R.id.greeting_user);
         greetingText.setText("Hello, " + userName + "!");
-
-
-        logOutButton = findViewById(R.id.logOutButton);
-        logOutButton.setOnClickListener(this);
 
         spinnerCurrencyFrom = findViewById(R.id.currencyFrom);
         spinnerCurrencyTo = findViewById(R.id.currencyTo);
@@ -155,11 +178,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        if (v.getId()==R.id.logOutButton) {
-            FirebaseAuth.getInstance().signOut();
-            Intent loginIntend = new Intent(this, LoginActivity.class);
-            startActivity(loginIntend);
-        }
 
         if (v.getId()==R.id.buy) {
             if (currencyFrom.getRateBuy()==0){
